@@ -13,7 +13,10 @@ stochmap : $(OBJS)
 	$(CC) $(CFLAGS) -o stochmap $(OBJS) $(LDFLAGS)
 
 %.o: %.c %.h
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -fPIC -c $<
 
+lib: libstochmap.so.1.0.1
+libstochmap.so.1.0.1: $(OBJS)
+	gcc -shared -Wl,-soname,libstochmap.so.1 -o libstochmap.so.1.0.1 $(OBJS) -lc
 clean :
 	$(RM) $(OBJS)
