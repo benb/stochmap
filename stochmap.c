@@ -111,9 +111,9 @@ int ReadSiteLogLikes(char *line, MrBFlt **sitelikes, int nproc, int *multiplicit
 void ReadSites(FILE *partial_fv, MrBFlt **sitelikes, int branch, int nstate, int nsite, MrBFlt *****partials, int nproc, int *multiplicities, int ****scalefact);
 void testEHD(MrBFlt **Fp,MrBFlt **Fc, MrBFlt *L);
 void WeightByPi(MrBFlt **F,MrBFlt *pi_i, int nsite, int nstate);
-void WriteResults(FILE *outfile,MrBFlt *****partials, int argc, char* argv[], int nbranch, int nproc, int nsite, MrBFlt ***condE, MrBFlt **priorE, MrBFlt **priorV, int *multiplicities, int *sitemap, int ncols, MrBFlt *tbranch);
+void WriteResults(FILE *outfile,MrBFlt *****partials,int nbranch, int nproc, int nsite, MrBFlt ***condE, MrBFlt **priorE, MrBFlt **priorV, int *multiplicities, int *sitemap, int ncols, MrBFlt *tbranch);
 
-void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap, MrBFlt *****partials, MrBFlt ***Qset, MrBFlt **sitelikes, MrBFlt **pi_i, MrBFlt *tbranch, MrBFlt *mixprobs, int argc, char *argv[], FILE *outfile);
+void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap, MrBFlt *****partials, MrBFlt ***Qset, MrBFlt **sitelikes, MrBFlt **pi_i, MrBFlt *tbranch, MrBFlt *mixprobs, FILE *outfile);
 
 /*allocate space for conditional expectations*/
 MrBFlt ***AllocatecondE(int nbranch,int nproc,int nsite)
@@ -1158,7 +1158,7 @@ void WeightByPi(MrBFlt **F,MrBFlt *pi_i, int nsite, int nstate)
 }
 
 /*write the results to an output file*/
-void WriteResults(FILE *outfile,MrBFlt *****partials, int argc, char* argv[], int nbranch, int nproc, int nsite, MrBFlt ***condE, MrBFlt **priorE, MrBFlt **priorV, int *multiplicities, int *sitemap, int ncols, MrBFlt *tbranch)
+void WriteResults(FILE *outfile,MrBFlt *****partials, int nbranch, int nproc, int nsite, MrBFlt ***condE, MrBFlt **priorE, MrBFlt **priorV, int *multiplicities, int *sitemap, int ncols, MrBFlt *tbranch)
 {
   int i,j,k,m,b;
   MrBFlt *totalb,*totalbp,*totals,*totalsp,*vbp,zij,*zs,z;
@@ -1171,8 +1171,6 @@ void WriteResults(FILE *outfile,MrBFlt *****partials, int argc, char* argv[], in
   totalsp=AllocateDoubleVector(ncols);
   zs=AllocateDoubleVector(ncols);
 
-  fprintf(outfile,"%s version %s\n%s\nCommand:\n",PROGRAM_NAME,PROGRAM_VERSION,COPYRIGHT);
-  for(i=0;i<argc;i++) fprintf(outfile,"%s%s",argv[i],(i<argc-1) ? " " : "");/*write arguments to output file*/
   fprintf(outfile,"\n");
   fprintf(outfile,"Branch\tProcess\tSite\tConditional_expectation\tPrior_expectation\tPrior_variance\tzscore\n");
   for(i=0;i<ncols;i++){
@@ -1223,7 +1221,7 @@ void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols,
         MrBFlt ***Qset, 
         MrBFlt **sitelikes, MrBFlt **pi_i,
         MrBFlt *tbranch, MrBFlt *mixprobs,
-        int argc, char *argv[],FILE *outfile
+        FILE *outfile
                 ){
     MrBFlt **ENLt, **ENLtD, **Pt,t; 
     MrBFlt ***condE;
@@ -1266,7 +1264,7 @@ void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols,
 	priorV[i][j]=computepriorVE(ENLtD,priorE[i][j],pi_i[j],Pt,nstate);/*prior variance of MEAN number of events: ADDED 25/6/10*/
       }
     }
-    WriteResults(outfile,partials,argc,argv,nbranch,nproc,nsite,condE,priorE,priorV,multiplicities,sitemap,ncols,tbranch);
+    WriteResults(outfile,partials,nbranch,nproc,nsite,condE,priorE,priorV,multiplicities,sitemap,ncols,tbranch);
     FreeSquareDoubleMatrix(ENLt);
     FreeSquareDoubleMatrix(ENLtD);
     FreeSquareDoubleMatrix(Pt);
@@ -1287,6 +1285,7 @@ int main(int argc, char * argv[])
   int ****scalefact;
   int **L;
   int *multiplicities, *sitemap;
+  int i;
   MrBFlt *****partials;
   MrBFlt ***Qset, ***QLset;
   MrBFlt **sitelikes, **pi_i;
@@ -1341,13 +1340,16 @@ int main(int argc, char * argv[])
     ReadLMatrix(lfilename,L,nstate);/*1 for transitions we want to count, 0 for others*/
     ReadPartials(infilename,Qset,partials,sitelikes,tbranch,mixprobs,nstate,nproc,nsite,multiplicities,scalefact,sitemap,ncols,pi_i);/*read the partial likelihood file*/
   
+    fprintf(outfile,"%s version %s\n%s\nCommand:\n",PROGRAM_NAME,PROGRAM_VERSION,COPYRIGHT);
+    for(i=0;i<argc;i++) fprintf(outfile,"%s%s",argv[i],(i<argc-1) ? " " : "");/*write arguments to output file*/
     CalculateAndWrite( nsite,  nstate,  nbranch,  nproc,  ncols,
          scalefact, L,  multiplicities, sitemap,
          partials,
          Qset, 
          sitelikes, pi_i,  
-         tbranch,  mixprobs, argc, argv, outfile);
+         tbranch,  mixprobs, outfile);
  
+
 
     /* free memory */
     FreeQset(Qset,nproc);
