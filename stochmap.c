@@ -113,8 +113,6 @@ void testEHD(MrBFlt **Fp,MrBFlt **Fc, MrBFlt *L);
 void WeightByPi(MrBFlt **F,MrBFlt *pi_i, int nsite, int nstate);
 void WriteResults(FILE *outfile,MrBFlt *****partials,int nbranch, int nproc, int nsite, MrBFlt ***condE, MrBFlt **priorE, MrBFlt **priorV, int *multiplicities, int *sitemap, int ncols, MrBFlt *tbranch);
 
-void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap, MrBFlt *****partials, MrBFlt ***Qset, MrBFlt **sitelikes, MrBFlt **pi_i, MrBFlt *tbranch, MrBFlt *mixprobs, FILE *outfile);
-
 /*allocate space for conditional expectations*/
 MrBFlt ***AllocatecondE(int nbranch,int nproc,int nsite)
 {

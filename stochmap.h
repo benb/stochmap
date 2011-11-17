@@ -41,5 +41,6 @@ typedef struct
 {
   boolean printHelp;/*show help and exit?*/
 } settings;
+void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap, MrBFlt *****partials, MrBFlt ***Qset, MrBFlt **sitelikes, MrBFlt **pi_i, MrBFlt *tbranch, MrBFlt *mixprobs, FILE *outfile);
 
 #endif /* STOCHMAP_H */

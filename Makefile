@@ -17,6 +17,6 @@ stochmap : $(OBJS)
 
 lib: libstochmap.so.1.0.1
 libstochmap.so.1.0.1: $(OBJS)
-	gcc -shared -Wl,-soname,libstochmap.so.1 -o libstochmap.so.1.0.1 $(OBJS) -lc
+	gcc -shared -Wl,-soname,libstochmap.so.1 -o libstochmap.so.1.0.1 $(OBJS) 
 clean :
 	$(RM) $(OBJS)
