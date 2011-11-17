@@ -113,7 +113,7 @@ void testEHD(MrBFlt **Fp,MrBFlt **Fc, MrBFlt *L);
 void WeightByPi(MrBFlt **F,MrBFlt *pi_i, int nsite, int nstate);
 void WriteResults(FILE *outfile,MrBFlt *****partials, int argc, char* argv[], int nbranch, int nproc, int nsite, MrBFlt ***condE, MrBFlt **priorE, MrBFlt **priorV, int *multiplicities, int *sitemap, int ncols, MrBFlt *tbranch);
 
-void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap, MrBFlt *****partials, MrBFlt ***Qset, MrBFlt ***QLset, MrBFlt **sitelikes, MrBFlt **pi_i, MrBFlt **priorE, MrBFlt **priorV, MrBFlt *tbranch, MrBFlt *mixprobs, int argc, char *argv[], FILE *outfile);
+void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap, MrBFlt *****partials, MrBFlt ***Qset, MrBFlt **sitelikes, MrBFlt **pi_i, MrBFlt **priorE, MrBFlt **priorV, MrBFlt *tbranch, MrBFlt *mixprobs, int argc, char *argv[], FILE *outfile);
 
 /*allocate space for conditional expectations*/
 MrBFlt ***AllocatecondE(int nbranch,int nproc,int nsite)
@@ -1220,7 +1220,7 @@ void WriteResults(FILE *outfile,MrBFlt *****partials, int argc, char* argv[], in
 
 void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap,
         MrBFlt *****partials,
-        MrBFlt ***Qset, MrBFlt ***QLset,
+        MrBFlt ***Qset, 
         MrBFlt **sitelikes, MrBFlt **pi_i, MrBFlt **priorE, MrBFlt **priorV,
         MrBFlt *tbranch, MrBFlt *mixprobs,
         int argc, char *argv[],FILE *outfile
@@ -1228,6 +1228,7 @@ void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols,
     MrBFlt **ENLt, **ENLtD, **Pt,t; 
     MrBFlt ***condE;
     MrBFlt **EigenValues,  ***EigVecs, ***inverseEigVecs;
+    MrBFlt ***QLset;
     int i,j;
 
     EigVecs=AllocateQset(nproc,nstate);
@@ -1239,6 +1240,7 @@ void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols,
     Pt=AllocateSquareDoubleMatrix(nstate);
     condE=AllocatecondE(nbranch,nproc,nsite);/*allocate memory for conditional expectations*/
     EigenValues=AllocateDoubleMatrix(nproc,nstate);/*eigenvalues for each process in rows*/
+    QLset=AllocateQset(nproc,nstate);
 
     for(i=0;i<nproc;i++){/*eigendecomposition, stationary distribution, and QL for each process*/
       EigenDecomp(nstate,Qset[i],EigenValues[i],EigVecs[i],inverseEigVecs[i]);/* eigendecomposition of rate matrix*/
@@ -1268,6 +1270,7 @@ void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols,
     FreecondE(condE,nbranch);
     FreeQset(EigVecs,nproc);
     FreeQset(inverseEigVecs,nproc);
+    FreeQset(QLset,nproc);
     FreeDoubleMatrix(EigenValues);
  
 }
@@ -1321,7 +1324,6 @@ int main(int argc, char * argv[])
     printf("%d sites in original alignment\n",ncols);
 
     Qset=AllocateQset(nproc,nstate);/*allocate memory for set of Q matrices*/
-    QLset=AllocateQset(nproc,nstate);
     pi_i=AllocateDoubleMatrix(nproc,nstate);/*stationary probabilities for each process in rows*/
     partials=AllocatePartials(nbranch,nproc,nsite,nstate);/*allocate memory for partial likelihoods*/
     sitelikes=AllocateDoubleMatrix(nproc,nsite);/*allocate memory for site likelihoods*/
@@ -1339,14 +1341,13 @@ int main(int argc, char * argv[])
     CalculateAndWrite( nsite,  nstate,  nbranch,  nproc,  ncols,
          scalefact, L,  multiplicities, sitemap,
          partials,
-         Qset,  QLset,
+         Qset, 
          sitelikes, pi_i,  priorE,  priorV,
          tbranch,  mixprobs, argc, argv, outfile);
  
 
     /* free memory */
     FreeQset(Qset,nproc);
-    FreeQset(QLset,nproc);
     FreeDoubleMatrix(pi_i);
     FreeDoubleMatrix(priorE);
     FreeDoubleMatrix(priorV);
