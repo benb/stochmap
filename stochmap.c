@@ -113,7 +113,7 @@ void testEHD(MrBFlt **Fp,MrBFlt **Fc, MrBFlt *L);
 void WeightByPi(MrBFlt **F,MrBFlt *pi_i, int nsite, int nstate);
 void WriteResults(FILE *outfile,MrBFlt *****partials, int argc, char* argv[], int nbranch, int nproc, int nsite, MrBFlt ***condE, MrBFlt **priorE, MrBFlt **priorV, int *multiplicities, int *sitemap, int ncols, MrBFlt *tbranch);
 
-void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap, MrBFlt *****partials, MrBFlt ***Qset, MrBFlt **sitelikes, MrBFlt **pi_i, MrBFlt **priorE, MrBFlt **priorV, MrBFlt *tbranch, MrBFlt *mixprobs, int argc, char *argv[], FILE *outfile);
+void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap, MrBFlt *****partials, MrBFlt ***Qset, MrBFlt **sitelikes, MrBFlt **pi_i, MrBFlt *tbranch, MrBFlt *mixprobs, int argc, char *argv[], FILE *outfile);
 
 /*allocate space for conditional expectations*/
 MrBFlt ***AllocatecondE(int nbranch,int nproc,int nsite)
@@ -1221,7 +1221,7 @@ void WriteResults(FILE *outfile,MrBFlt *****partials, int argc, char* argv[], in
 void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap,
         MrBFlt *****partials,
         MrBFlt ***Qset, 
-        MrBFlt **sitelikes, MrBFlt **pi_i, MrBFlt **priorE, MrBFlt **priorV,
+        MrBFlt **sitelikes, MrBFlt **pi_i,
         MrBFlt *tbranch, MrBFlt *mixprobs,
         int argc, char *argv[],FILE *outfile
                 ){
@@ -1229,7 +1229,10 @@ void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols,
     MrBFlt ***condE;
     MrBFlt **EigenValues,  ***EigVecs, ***inverseEigVecs;
     MrBFlt ***QLset;
+    MrBFlt **priorE, **priorV;
     int i,j;
+    priorE=AllocateDoubleMatrix(nbranch,nproc);/*prior expectation for each branch and process*/
+    priorV=AllocateDoubleMatrix(nbranch,nproc);/*prior variance for each branch and process*/
 
     EigVecs=AllocateQset(nproc,nstate);
     inverseEigVecs=AllocateQset(nproc,nstate);
@@ -1272,6 +1275,8 @@ void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols,
     FreeQset(inverseEigVecs,nproc);
     FreeQset(QLset,nproc);
     FreeDoubleMatrix(EigenValues);
+    FreeDoubleMatrix(priorE);
+    FreeDoubleMatrix(priorV);
  
 }
 
@@ -1284,7 +1289,7 @@ int main(int argc, char * argv[])
   int *multiplicities, *sitemap;
   MrBFlt *****partials;
   MrBFlt ***Qset, ***QLset;
-  MrBFlt **sitelikes, **pi_i, **priorE, **priorV;
+  MrBFlt **sitelikes, **pi_i;
   MrBFlt *tbranch, *mixprobs;
   settings      *sets;
   char          *infilename, *outfilename, *lfilename;
@@ -1333,8 +1338,6 @@ int main(int argc, char * argv[])
     multiplicities=AllocateIntegerVector(nsite);/*allocate memory for site multiplicities*/
     sitemap=AllocateIntegerVector(ncols);/*allocate memory for site map*/
     L=AllocateSquareIntegerMatrix(nstate);/*matrix of labelled transitions*/
-    priorE=AllocateDoubleMatrix(nbranch,nproc);/*prior expectation for each branch and process*/
-    priorV=AllocateDoubleMatrix(nbranch,nproc);/*prior variance for each branch and process*/
     ReadLMatrix(lfilename,L,nstate);/*1 for transitions we want to count, 0 for others*/
     ReadPartials(infilename,Qset,partials,sitelikes,tbranch,mixprobs,nstate,nproc,nsite,multiplicities,scalefact,sitemap,ncols,pi_i);/*read the partial likelihood file*/
   
@@ -1342,15 +1345,13 @@ int main(int argc, char * argv[])
          scalefact, L,  multiplicities, sitemap,
          partials,
          Qset, 
-         sitelikes, pi_i,  priorE,  priorV,
+         sitelikes, pi_i,  
          tbranch,  mixprobs, argc, argv, outfile);
  
 
     /* free memory */
     FreeQset(Qset,nproc);
     FreeDoubleMatrix(pi_i);
-    FreeDoubleMatrix(priorE);
-    FreeDoubleMatrix(priorV);
     FreePartials(partials,nbranch,nproc);
     FreeDoubleMatrix(sitelikes);
     free(tbranch);
