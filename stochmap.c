@@ -113,6 +113,8 @@ void testEHD(MrBFlt **Fp,MrBFlt **Fc, MrBFlt *L);
 void WeightByPi(MrBFlt **F,MrBFlt *pi_i, int nsite, int nstate);
 void WriteResults(FILE *outfile,MrBFlt *****partials, int argc, char* argv[], int nbranch, int nproc, int nsite, MrBFlt ***condE, MrBFlt **priorE, MrBFlt **priorV, int *multiplicities, int *sitemap, int ncols, MrBFlt *tbranch);
 
+void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap, MrBFlt *****partials, MrBFlt ***Qset, MrBFlt ***condE, MrBFlt ***EigVecs, MrBFlt ***inverseEigVecs, MrBFlt ***QLset, MrBFlt **sitelikes, MrBFlt **EigenValues, MrBFlt **pi_i, MrBFlt **priorE, MrBFlt **priorV, MrBFlt *tbranch, MrBFlt *mixprobs, int argc, char *argv[], FILE *outfile);
+
 /*allocate space for conditional expectations*/
 MrBFlt ***AllocatecondE(int nbranch,int nproc,int nsite)
 {
@@ -1216,17 +1218,59 @@ void WriteResults(FILE *outfile,MrBFlt *****partials, int argc, char* argv[], in
   free(zs);
 }
 
+void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap,
+        MrBFlt *****partials,
+        MrBFlt ***Qset, MrBFlt ***condE, MrBFlt ***EigVecs, MrBFlt ***inverseEigVecs, MrBFlt ***QLset,
+        MrBFlt **sitelikes, MrBFlt **EigenValues, MrBFlt **pi_i, MrBFlt **priorE, MrBFlt **priorV,
+        MrBFlt *tbranch, MrBFlt *mixprobs,
+        int argc, char *argv[],FILE *outfile
+                ){
+    MrBFlt **ENLt, **ENLtD, **Pt,t; 
+    int i,j;
+    /*allocate space for calculations*/
+    ENLt=AllocateSquareDoubleMatrix(nstate);
+    ENLtD=AllocateSquareDoubleMatrix(nstate);
+    Pt=AllocateSquareDoubleMatrix(nstate);
+
+    for(i=0;i<nproc;i++){/*eigendecomposition, stationary distribution, and QL for each process*/
+      EigenDecomp(nstate,Qset[i],EigenValues[i],EigVecs[i],inverseEigVecs[i]);/* eigendecomposition of rate matrix*/
+      makeQL(Qset[i],L,QLset[i],nstate);/*construct QL matrix*/
+      /*computepi(nstate, inverseEigVecs[i], EigenValues[i], pi_i[i]);*//*NOT NEEDED ANY MORE: SHOULD BE IN FILE stationary distributions*/
+    }
+ 
+    /*do the computations for each branch, process, and site*/
+    for(i=0;i<nbranch;i++){
+      t=tbranch[i];/*get branch length*/
+      for(j=0;j<nproc;j++){
+	computeENLt(nstate, QLset[j], t, ENLt, EigVecs[j], inverseEigVecs[j], EigenValues[j]);/*joint mean expectation*/
+	computePt(nstate, t, EigVecs[j], inverseEigVecs[j], EigenValues[j], Pt);/*transition probabilities*/
+ 	computeENLtD(nstate,ENLt,Pt,ENLtD);/*conditional mean matrix: we don't need this explicitly. See eq. 3.8 in Minin and Suchard*/
+	priorE[i][j]=computepriorE(pi_i[j],QLset[j],t,nstate);/*prior mean*/
+	/*priorV[i][j]=computepriorV(priorE[i][j],pi_i[j],QLset[j],t,nstate,EigVecs[j],inverseEigVecs[j],EigenValues[j]);*/ /*ORIGINAL VERSION: THIS IS THE WRONG VARIANCE (VARIANCE OF NUMBER OF EVENTS, NOT EXPECTED NUMBER OF EVENTS*/
+	WeightByPi(partials[i][j][0],pi_i[j],nsite,nstate);/*stationary probabilities need to go in on one end or the other (doesn't matter which provided the substitution model is reversible and the counting set is symmetrical)*/
+	/*computeEHD(partials[i][j][0], partials[i][j][1], Pt, sitelikes[j], condE[i][j], nstate, nsite,scalefact[i][j]);*//*TEST: should get a vector of 1s. Real code is below*/
+	computeEHD(partials[i][j][0], partials[i][j][1], ENLt, sitelikes[j], condE[i][j], nstate, nsite,scalefact[i][j]);/*conditional expected numbers of labelled changes*/
+	priorV[i][j]=computepriorVE(ENLtD,priorE[i][j],pi_i[j],Pt,nstate);/*prior variance of MEAN number of events: ADDED 25/6/10*/
+      }
+    }
+    WriteResults(outfile,partials,argc,argv,nbranch,nproc,nsite,condE,priorE,priorV,multiplicities,sitemap,ncols,tbranch);
+    FreeSquareDoubleMatrix(ENLt);
+    FreeSquareDoubleMatrix(ENLtD);
+    FreeSquareDoubleMatrix(Pt);
+ 
+}
+
+
 int main(int argc, char * argv[])
 {
-  int nsite,nstate,nbranch,nproc,i,j,ncols;
+  int nsite,nstate,nbranch,nproc,ncols;
   int ****scalefact;
   int **L;
   int *multiplicities, *sitemap;
   MrBFlt *****partials;
   MrBFlt ***Qset, ***condE, ***EigVecs, ***inverseEigVecs, ***QLset;
-  MrBFlt **sitelikes, **ENLt, **ENLtD, **Pt, **EigenValues, **pi_i, **priorE, **priorV;
+  MrBFlt **sitelikes,**EigenValues, **pi_i, **priorE, **priorV;
   MrBFlt *tbranch, *mixprobs;
-  MrBFlt t;
   settings      *sets;
   char          *infilename, *outfilename, *lfilename;
   FILE          *outfile;
@@ -1284,33 +1328,20 @@ int main(int argc, char * argv[])
     ReadLMatrix(lfilename,L,nstate);/*1 for transitions we want to count, 0 for others*/
     ReadPartials(infilename,Qset,partials,sitelikes,tbranch,condE,mixprobs,nstate,nproc,nsite,multiplicities,scalefact,sitemap,ncols,pi_i);/*read the partial likelihood file*/
   
-    /*allocate space for calculations*/
-    ENLt=AllocateSquareDoubleMatrix(nstate);
-    ENLtD=AllocateSquareDoubleMatrix(nstate);
-    Pt=AllocateSquareDoubleMatrix(nstate);
+    /*for(x=0;x<nstate;x++){*/
+            /*for (y=0;y<nstate;y++){*/
+                    /*printf("%x ",L[x][y]);*/
+            /*}*/
+            /*printf("\n");*/
+    /*}*/
 
-    for(i=0;i<nproc;i++){/*eigendecomposition, stationary distribution, and QL for each process*/
-      EigenDecomp(nstate,Qset[i],EigenValues[i],EigVecs[i],inverseEigVecs[i]);/* eigendecomposition of rate matrix*/
-      makeQL(Qset[i],L,QLset[i],nstate);/*construct QL matrix*/
-      /*computepi(nstate, inverseEigVecs[i], EigenValues[i], pi_i[i]);*//*NOT NEEDED ANY MORE: SHOULD BE IN FILE stationary distributions*/
-    }
+    CalculateAndWrite( nsite,  nstate,  nbranch,  nproc,  ncols,
+         scalefact, L,  multiplicities, sitemap,
+         partials,
+         Qset,  condE,  EigVecs,  inverseEigVecs,  QLset,
+         sitelikes,  EigenValues,  pi_i,  priorE,  priorV,
+         tbranch,  mixprobs, argc, argv, outfile);
  
-    /*do the computations for each branch, process, and site*/
-    for(i=0;i<nbranch;i++){
-      t=tbranch[i];/*get branch length*/
-      for(j=0;j<nproc;j++){
-	computeENLt(nstate, QLset[j], t, ENLt, EigVecs[j], inverseEigVecs[j], EigenValues[j]);/*joint mean expectation*/
-	computePt(nstate, t, EigVecs[j], inverseEigVecs[j], EigenValues[j], Pt);/*transition probabilities*/
- 	computeENLtD(nstate,ENLt,Pt,ENLtD);/*conditional mean matrix: we don't need this explicitly. See eq. 3.8 in Minin and Suchard*/
-	priorE[i][j]=computepriorE(pi_i[j],QLset[j],t,nstate);/*prior mean*/
-	/*priorV[i][j]=computepriorV(priorE[i][j],pi_i[j],QLset[j],t,nstate,EigVecs[j],inverseEigVecs[j],EigenValues[j]);*/ /*ORIGINAL VERSION: THIS IS THE WRONG VARIANCE (VARIANCE OF NUMBER OF EVENTS, NOT EXPECTED NUMBER OF EVENTS*/
-	WeightByPi(partials[i][j][0],pi_i[j],nsite,nstate);/*stationary probabilities need to go in on one end or the other (doesn't matter which provided the substitution model is reversible and the counting set is symmetrical)*/
-	/*computeEHD(partials[i][j][0], partials[i][j][1], Pt, sitelikes[j], condE[i][j], nstate, nsite,scalefact[i][j]);*//*TEST: should get a vector of 1s. Real code is below*/
-	computeEHD(partials[i][j][0], partials[i][j][1], ENLt, sitelikes[j], condE[i][j], nstate, nsite,scalefact[i][j]);/*conditional expected numbers of labelled changes*/
-	priorV[i][j]=computepriorVE(ENLtD,priorE[i][j],pi_i[j],Pt,nstate);/*prior variance of MEAN number of events: ADDED 25/6/10*/
-      }
-    }
-    WriteResults(outfile,partials,argc,argv,nbranch,nproc,nsite,condE,priorE,priorV,multiplicities,sitemap,ncols,tbranch);
 
     /* free memory */
     FreeQset(Qset,nproc);
@@ -1329,10 +1360,7 @@ int main(int argc, char * argv[])
     free(mixprobs);
     free(multiplicities);
     free(sitemap);
-    FreeSquareDoubleMatrix(ENLt);
-    FreeSquareDoubleMatrix(ENLtD);
-    FreeSquareDoubleMatrix(Pt);
-    FreeSquareIntegerMatrix(L);
+   FreeSquareIntegerMatrix(L);
     free(infilename);
     free(outfilename);
     free(lfilename);
