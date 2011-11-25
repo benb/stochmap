@@ -1,0 +1,7 @@
+You ought to be able to install this with:
+cabal install --gcc-options="-I ../source"
+
+When you build a package that links against this try:
+cabal install --ghc-options="-L$LIBDIR -lstochmap"
+
+Where $LIBDIR is the location of libstochmap.so
