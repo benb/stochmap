@@ -35,6 +35,7 @@
 #define LEN		1000 /*length of file name strings*/
 #define LINELEN 100000 /*max length of line in file*/
 #define LOGTEN 2.302585092994046 /*natural log of 10*/
+#include "mb.h"
 typedef int boolean;
 /*structure to hold settings*/
 typedef struct
@@ -42,5 +43,6 @@ typedef struct
   boolean printHelp;/*show help and exit?*/
 } settings;
 void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap, MrBFlt *****partials, MrBFlt ***Qset, MrBFlt **sitelikes, MrBFlt **pi_i, MrBFlt *tbranch, MrBFlt *mixprobs, FILE *outfile);
+void test(FILE *outfile, int x);
 
 #endif /* STOCHMAP_H */

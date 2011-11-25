@@ -1277,6 +1277,7 @@ void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols,
 }
 
 
+#ifndef BUILDLIBRARY
 int main(int argc, char * argv[])
 {
   int nsite,nstate,nbranch,nproc,ncols;
@@ -1285,7 +1286,7 @@ int main(int argc, char * argv[])
   int *multiplicities, *sitemap;
   int i;
   MrBFlt *****partials;
-  MrBFlt ***Qset, ***QLset;
+  MrBFlt ***Qset;
   MrBFlt **sitelikes, **pi_i;
   MrBFlt *tbranch, *mixprobs;
   settings      *sets;
@@ -1368,3 +1369,4 @@ int main(int argc, char * argv[])
   }
   return (0);
 }
+#endif
