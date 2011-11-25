@@ -1,0 +1,108 @@
+#DENDROSCOPE
+{TREE 'Tree1'
+(Aeropyrum_pernix:0.414406,Methanosarcina_barkeri:0.412937,(Entamoeba_histolytica:0.115825,(Blastocystis_hominis:0.210453,(((((Acrasis_rosea:0.232547,(Stylonychia_lemnae:0.161678,(Euglena_gracilis:0.083316,Trypanosoma_brucei:0.137735):0.01434):0.02107):0.026128,(Phytophthora_capsici:0.135981,(Arabidopsis_thaliana:0.020035,Nicotiana_tabacum:0.010339):0.150537):0.023907):0.006977,(Dictyostelium_discoideum:0.13748,(Mastigamoeba_balamuthi:0.167392,Porphyra_purpurea:0.15555):0.029649):0.039522):0.01766,(Cyanophora_paradoxa:0.117461,(((Schizosaccharomyces_pombe:0.080673,Podospora_anserina:0.063063):0.03926,(Antonospora_locustae:0.357839,(Glugea_plecoglossi:0.349207,Encephalitozoon_cuniculi:0.711127):0.103921):1.320913):0.0,(Caenorhabditis_elegans:0.134848,Homo_sapiens:0.065346):0.040412):0.03825):0.01955):0.019466,(Plasmodium_knowlesi:0.177799,Cryptosporidium_parvum:0.139046):0.103842):0.047221):0.065662):0.465416);
+}
+{GRAPHVIEW
+nnodes=46 nedges=45
+nodes
+1: nh=2 nw=2 fg=0 0 0 bg=0 0 0 w=1 sh=0 x=0.0 y=4.080078 fx=1 lc=0 0 0 lk=null lx=0 ly=0 ll=3 lv=1;
+2: x=0.414406 y=1.0 ft='Arial-ITALIC-16' ll=7 lb='Aeropyrum pernix';
+3: x=0.412937 y=2.0 lb='Methanosarcina barkeri';
+4: x=0.465416 y=7.1601562 ft='Arial-PLAIN-14';
+5: x=0.581241 y=3.0 ft='Arial-ITALIC-16' lb='Entamoeba histolytica';
+6: x=0.531078 y=11.3203125 ft='Arial-PLAIN-14';
+7: x=0.741531 y=4.0 ft='Arial-ITALIC-16' lb='Blastocystis hominis';
+8: x=0.578299 y=18.640625 ft='Arial-PLAIN-14';
+9: x=0.597765 y=13.78125;
+10: x=0.615425 y=10.28125;
+11: x=0.622402 y=7.8125;
+12: x=0.64853 y=5.875;
+13: x=0.881077 y=5.0 ft='Arial-ITALIC-16' lb='Acrasis rosea';
+14: x=0.6696 y=6.75 ft='Arial-PLAIN-14';
+15: x=0.831278 y=6.0 ft='Arial-ITALIC-16' lb='Stylonychia lemnae';
+16: x=0.68394 y=7.5 ft='Arial-PLAIN-14';
+17: x=0.767256 y=7.0 ft='Arial-ITALIC-16' lb='Euglena gracilis';
+18: x=0.821675 y=8.0 lb='Trypanosoma brucei';
+19: x=0.646309 y=9.75 ft='Arial-PLAIN-14';
+20: x=0.78229 y=9.0 ft='Arial-ITALIC-16' lb='Phytophthora capsici';
+21: x=0.796846 y=10.5 ft='Arial-PLAIN-14';
+22: x=0.816881 y=10.0 ft='Arial-ITALIC-16' lb='Arabidopsis thaliana';
+23: x=0.807185 y=11.0 lb='Nicotiana tabacum';
+24: x=0.654947 y=12.75 ft='Arial-PLAIN-14';
+25: x=0.792427 y=12.0 ft='Arial-ITALIC-16' lb='Dictyostelium discoideum';
+26: x=0.684596 y=13.5 ft='Arial-PLAIN-14';
+27: x=0.851988 y=13.0 ft='Arial-ITALIC-16' lb='Mastigamoeba balamuthi';
+28: x=0.840146 y=14.0 lb='Porphyra purpurea';
+29: x=0.617315 y=17.28125 ft='Arial-PLAIN-14';
+30: x=0.734776 y=15.0 ft='Arial-ITALIC-16' lb='Cyanophora paradoxa';
+31: x=0.655565 y=19.5625 ft='Arial-PLAIN-14';
+32: x=0.655565 y=17.625;
+33: x=0.694825 y=16.5;
+34: x=0.775498 y=16.0 ft='Arial-ITALIC-16' lb='Schizosaccharomyces pombe';
+35: x=0.757888 y=17.0 lb='Podospora anserina';
+36: x=1.976478 y=18.75 ft='Arial-PLAIN-14';
+37: x=2.334317 y=18.0 ft='Arial-ITALIC-16' lb='Antonospora locustae';
+38: x=2.080399 y=19.5 ft='Arial-PLAIN-14';
+39: x=2.429606 y=19.0 ft='Arial-ITALIC-16' lb='Glugea plecoglossi';
+40: x=2.791526 y=20.0 lb='Encephalitozoon cuniculi';
+41: x=0.695977 y=21.5 ft='Arial-PLAIN-14';
+42: x=0.830825 y=21.0 ft='Arial-ITALIC-16' lb='Caenorhabditis elegans';
+43: x=0.761323 y=22.0 lb='Homo sapiens';
+44: x=0.682141 y=23.5 ft='Arial-PLAIN-14';
+45: x=0.85994 y=23.0 ft='Arial-ITALIC-16' lb='Plasmodium knowlesi';
+46: x=0.821187 y=24.0 lb='Cryptosporidium parvum';
+edges
+1: fg=97  158  255  w=2 sh=1 ip= < 0.0 1.0> dr=1 lc=0 0 0 lk=null lx=0 ly=0 ll=11 lv=1 lb='0.414406';
+2: fg=126  129  255 ip= < 0.0 2.0> lb='0.412937';
+4: fg=38  217  255 ip= < 0.465416 3.0> lb='0.115825';
+6: fg=38  217  255 ip= < 0.531078 4.0> lb='0.210453';
+12: fg=3  252  255 ip= < 0.64853 5.0> lb='0.232547';
+14: fg=21  234  255 ip= < 0.6696 6.0> lb='0.161678';
+16: fg=42  213  255 ip= < 0.68394 7.0> lb='0.083316';
+17: fg=38  217  255 ip= < 0.68394 8.0> lb='0.137735';
+15: fg=44  211  255 ip= < 0.6696 7.5> lb='0.01434';
+13: fg=38  217  255 ip= < 0.64853 6.75> lb='0.02107';
+11: fg=26  229  255 ip= < 0.622402 5.875> lb='0.026128';
+19: fg=34  221  255 ip= < 0.646309 9.0> lb='0.135981';
+21: fg=48  207  255 ip= < 0.796846 10.0> lb='0.020035';
+22: fg=48  207  255 ip= < 0.796846 11.0> lb='0.010339';
+20: fg=27  228  255 ip= < 0.646309 10.5> lb='0.150537';
+18: fg=40  215  255 ip= < 0.622402 9.75> lb='0.023907';
+10: fg=45  210  255 ip= < 0.615425 7.8125> lb='0.006977';
+24: fg=22  233  255 ip= < 0.654947 12.0> lb='0.13748';
+26: fg=25  230  255 ip= < 0.684596 13.0> lb='0.167392';
+27: fg=19  236  255 ip= < 0.684596 14.0> lb='0.15555';
+25: fg=32  223  255 ip= < 0.654947 13.5> lb='0.029649';
+23: fg=17  238  255 ip= < 0.615425 12.75> lb='0.039522';
+9: fg=46  209  255 ip= < 0.597765 10.28125> lb='0.01766';
+29: fg=26  229  255 ip= < 0.617315 15.0> lb='0.117461';
+33: fg=48  207  255 ip= < 0.694825 16.0> lb='0.080673';
+34: fg=59  196  255 ip= < 0.694825 17.0> lb='0.063063';
+32: fg=51  204  255 ip= < 0.655565 16.5> lb='0.03926';
+36: fg=137  118  255 ip= < 1.976478 18.0> lb='0.357839';
+38: fg=141  114  255 ip= < 2.080399 19.0> lb='0.349207';
+39: fg=255    0  255 ip= < 2.080399 20.0> lb='0.711127';
+37: fg=87  168  255 ip= < 1.976478 19.5> lb='0.103921';
+35: fg=173   82  255 ip= < 0.655565 18.75> lb='1.320913';
+31: fg=166  166  166 ip= < 0.655565 17.625> lb='0.0';
+41: fg=21  234  255 ip= < 0.695977 21.0> lb='0.134848';
+42: fg=42  213  255 ip= < 0.695977 22.0> lb='0.065346';
+40: fg=21  234  255 ip= < 0.655565 21.5> lb='0.040412';
+30: fg=0  255  255 ip= < 0.617315 19.5625> lb='0.03825';
+28: fg=20  235  255 ip= < 0.597765 17.28125> lb='0.01955';
+8: fg=39  216  255 ip= < 0.578299 13.78125> lb='0.019466';
+44: fg=90  165  255 ip= < 0.682141 23.0> lb='0.177799';
+45: fg=47  208  255 ip= < 0.682141 24.0> lb='0.139046';
+43: fg=30  225  255 ip= < 0.578299 23.5> lb='0.103842';
+7: fg=38  217  255 ip= < 0.531078 18.640625> lb='0.047221';
+5: fg=45  210  255 ip= < 0.465416 11.3203125> lb='0.065662';
+3: fg=215   40  255 ip= < 0.0 7.1601562> lb='0.465416';
+}
+{DENDRO
+root=1
+drawer=RectangularPhylogram
+toscale=true
+radiallabels=false
+collapsed=0
+trans=angle:0.0 scaleX:489.33807 scaleY:31.652174 flipH:0 flipV:0 leftMargin:833 rightMargin:833 topMargin:464 bottomMargin:464;
+}
