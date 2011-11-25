@@ -1,3 +1,9 @@
+This is a fork of Matthew Spencer's stochastic mapping code. The original
+source is available at http://www.liv.ac.uk/~matts/covarion.html
+
+I have changed the source to enable building stochmap as a library, and link
+against the Haskell FFI. The original README follows:
+
 Stochmap version 1.0: stochastic mapping on phylogenetic trees
 Matthew Spencer,
 School of Environmental Sciences,
