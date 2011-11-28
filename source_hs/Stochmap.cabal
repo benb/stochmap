@@ -47,7 +47,7 @@ Library
   -- Modules exported by the library.
   Exposed-modules:     Stochmap
   HS-Source-Dirs:      src
-  Build-Depends:       base >= 3
+  Build-Depends:       base >= 3, unix >= 2.4
   
   -- Packages needed in order to build this package.
   -- Build-depends:       
