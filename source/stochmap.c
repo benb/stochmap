@@ -1214,7 +1214,7 @@ void WriteResults(FILE *outfile,MrBFlt *****partials, int nbranch, int nproc, in
   free(zs);
 }
 
-void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap,
+StochmapResult *CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap,
         MrBFlt *****partials,
         MrBFlt ***Qset, 
         MrBFlt **sitelikes, MrBFlt **pi_i,
@@ -1227,6 +1227,8 @@ void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols,
     MrBFlt ***QLset;
     MrBFlt **priorE, **priorV;
     int i,j;
+    StochmapResult *result;
+
     priorE=AllocateDoubleMatrix(nbranch,nproc);/*prior expectation for each branch and process*/
     priorV=AllocateDoubleMatrix(nbranch,nproc);/*prior variance for each branch and process*/
 
@@ -1268,14 +1270,24 @@ void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols,
     FreeSquareDoubleMatrix(ENLt);
     FreeSquareDoubleMatrix(ENLtD);
     FreeSquareDoubleMatrix(Pt);
-    FreecondE(condE,nbranch);
     FreeQset(EigVecs,nproc);
     FreeQset(inverseEigVecs,nproc);
     FreeQset(QLset,nproc);
     FreeDoubleMatrix(EigenValues);
-    FreeDoubleMatrix(priorE);
-    FreeDoubleMatrix(priorV);
- 
+
+    for(i=0;i<nbranch;i++){
+            printf("PTR %p\n",priorE[i]);
+    }
+
+    result = (StochmapResult*)malloc(sizeof(StochmapResult));
+    if (!result)
+    return NULL;
+
+    result->condE = condE;
+    result->priorE = priorE;
+
+    printf("PTR PTR %p %p %p %p\n",priorE,condE,result->priorE,result->condE);
+    return result;
 }
 
 
@@ -1367,8 +1379,19 @@ int main(int argc, char * argv[])
     free(outfilename);
     free(lfilename);
     free(sets);
+
+    FreecondE(condE,nbranch);
+    FreeDoubleMatrix(priorE);
+    FreeDoubleMatrix(priorV);
+
+
     fclose(outfile);
+
+
+
   }
+
+
   return (0);
 }
 #endif

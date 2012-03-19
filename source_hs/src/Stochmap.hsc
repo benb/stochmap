@@ -20,10 +20,36 @@ handleToCFile h m = do iomode <- newCString m
                        fdopen fd iomode
 
 foreign import ccall "stochmap.h CalculateAndWrite"
-     c_CalculateAndWrite :: CInt -> CInt -> CInt -> CInt -> CInt -> Ptr (Ptr (Ptr (Ptr CInt))) -> Ptr (Ptr CInt) -> Ptr CInt -> Ptr CInt -> Ptr (Ptr (Ptr (Ptr (Ptr CDouble)))) -> Ptr (Ptr (Ptr CDouble)) -> Ptr (Ptr CDouble) -> Ptr (Ptr CDouble) -> Ptr CDouble -> Ptr CDouble -> Ptr CFile -> IO ()
+     c_CalculateAndWrite :: CInt -> CInt -> CInt -> CInt -> CInt -> Ptr (Ptr (Ptr (Ptr CInt))) -> Ptr (Ptr CInt) -> Ptr CInt -> Ptr CInt -> Ptr (Ptr (Ptr (Ptr (Ptr CDouble)))) -> Ptr (Ptr (Ptr CDouble)) -> Ptr (Ptr CDouble) -> Ptr (Ptr CDouble) -> Ptr CDouble -> Ptr CDouble -> Ptr CFile -> IO (Ptr StochmapResultC)
+
+
+data StochmapResultC = StochmapResultC {condE :: (Ptr (Ptr (Ptr CDouble))), priorE :: (Ptr (Ptr CDouble))}
+instance Storable StochmapResultC where
+        sizeOf _ = (#size StochmapResult)
+        alignment _ = alignment (undefined::(Ptr CDouble)) -- Ints and Ptrs should both be 4-byte aligned
+        peek ptr = do
+                condE' <- (#peek StochmapResult, condE) ptr
+                priorE' <- (#peek StochmapResult, priorE) ptr
+                return StochmapResultC {condE=condE',priorE=priorE'}
+
+
+parseResult :: Int -> Int -> Int -> StochmapResultC -> IO ([[[Double]]],[[Double]])
+parseResult nbranch nproc ncols (StochmapResultC condEC priorEC)= do 
+                                                                  print priorEC
+                                                                  print condEC
+                                                                  priorE'' <- peekArray nbranch priorEC
+                                                                  print priorE''
+                                                                  priorE' <- mapM (peekArray nproc) priorE''
+                                                                  let priorEConv = map (map realToFrac) priorE'
+                                                                  condE''' <- peekArray nbranch condEC
+                                                                  condE'' <- mapM (peekArray nproc) condE'''
+                                                                  condE' <- (mapM . mapM) (peekArray ncols) condE''
+                                                                  let condEConv = (map . map . map) realToFrac condE'
+                                                                  return (condEConv,priorEConv)
+
 
 {-- exposed function --}
-calculateAndWrite :: Int -> Int -> Int -> Int -> Int -> [[Int]] -> [Int] -> [Int] -> [[[[[Double]]]]] -> [[[Double]]] -> [[Double]] -> [[Double]] -> [Double] -> [Double] -> Maybe Handle -> IO ()
+--calculateAndWrite :: Int -> Int -> Int -> Int -> Int -> [[Int]] -> [Int] -> [Int] -> [[[[[Double]]]]] -> [[[Double]]] -> [[Double]] -> [[Double]] -> [Double] -> [Double] -> Maybe Handle -> IO ([[[Double]]],[[Double]])
 calculateAndWrite nSite nState nBranch nProc nCols lMat
             multiplicites sitemap partials qset sitelikes pi_i 
             branchLengths mixProbs handle = do let c_nSite = fromIntegral nSite
@@ -43,7 +69,9 @@ calculateAndWrite nSite nState nBranch nProc nCols lMat
                                                c_pi_i <- newArray2 realToFrac pi_i
                                                c_branchLengths <- newArrayX realToFrac branchLengths
                                                c_mixProbs <- newArrayX realToFrac mixProbs
-                                               c_CalculateAndWrite c_nSite c_nState c_nBranch c_nProc c_nCols c_scales c_lMat c_multiplicites c_sitemap c_partials c_qset c_sitelikes c_pi_i c_branchLengths c_mixProbs c_handle
+                                               ans <- c_CalculateAndWrite c_nSite c_nState c_nBranch c_nProc c_nCols c_scales c_lMat c_multiplicites c_sitemap c_partials c_qset c_sitelikes c_pi_i c_branchLengths c_mixProbs c_handle
+                                               ans' <- peek ans
+                                               parseResult nBranch nProc nCols ans'
 
 
 newArrayX f xs = newArray $ map f xs
