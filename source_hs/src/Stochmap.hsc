@@ -3,6 +3,7 @@ module Stochmap (calculateAndWrite) where
 
 import Foreign
 import Foreign.C
+import Foreign.Ptr (nullPtr)
 import Foreign.C.Types
 import Foreign.C.String (CString,newCString)
 import System.IO
@@ -22,7 +23,7 @@ foreign import ccall "stochmap.h CalculateAndWrite"
      c_CalculateAndWrite :: CInt -> CInt -> CInt -> CInt -> CInt -> Ptr (Ptr (Ptr (Ptr CInt))) -> Ptr (Ptr CInt) -> Ptr CInt -> Ptr CInt -> Ptr (Ptr (Ptr (Ptr (Ptr CDouble)))) -> Ptr (Ptr (Ptr CDouble)) -> Ptr (Ptr CDouble) -> Ptr (Ptr CDouble) -> Ptr CDouble -> Ptr CDouble -> Ptr CFile -> IO ()
 
 {-- exposed function --}
-calculateAndWrite :: Int -> Int -> Int -> Int -> Int -> [[Int]] -> [Int] -> [Int] -> [[[[[Double]]]]] -> [[[Double]]] -> [[Double]] -> [[Double]] -> [Double] -> [Double] -> Handle -> IO ()
+calculateAndWrite :: Int -> Int -> Int -> Int -> Int -> [[Int]] -> [Int] -> [Int] -> [[[[[Double]]]]] -> [[[Double]]] -> [[Double]] -> [[Double]] -> [Double] -> [Double] -> Maybe Handle -> IO ()
 calculateAndWrite nSite nState nBranch nProc nCols lMat
             multiplicites sitemap partials qset sitelikes pi_i 
             branchLengths mixProbs handle = do let c_nSite = fromIntegral nSite
@@ -30,7 +31,9 @@ calculateAndWrite nSite nState nBranch nProc nCols lMat
                                                let c_nBranch = fromIntegral nBranch
                                                let c_nProc = fromIntegral nProc
                                                let c_nCols = fromIntegral nCols
-                                               c_handle <- handleToCFile handle "w"
+                                               c_handle <- case handle of
+                                                                Just h -> handleToCFile h "w"
+                                                                Nothing -> return nullPtr
                                                (c_scales,c_partials) <- makeScalesPtr partials
                                                c_lMat <- newArray2 fromIntegral lMat
                                                c_multiplicites <- newArrayX fromIntegral multiplicites

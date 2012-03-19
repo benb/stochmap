@@ -1262,7 +1262,9 @@ void CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols,
 	priorV[i][j]=computepriorVE(ENLtD,priorE[i][j],pi_i[j],Pt,nstate);/*prior variance of MEAN number of events: ADDED 25/6/10*/
       }
     }
-    WriteResults(outfile,partials,nbranch,nproc,nsite,condE,priorE,priorV,multiplicities,sitemap,ncols,tbranch);
+    if (outfile){
+            WriteResults(outfile,partials,nbranch,nproc,nsite,condE,priorE,priorV,multiplicities,sitemap,ncols,tbranch);
+    }
     FreeSquareDoubleMatrix(ENLt);
     FreeSquareDoubleMatrix(ENLtD);
     FreeSquareDoubleMatrix(Pt);
