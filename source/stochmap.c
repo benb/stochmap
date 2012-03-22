@@ -1275,10 +1275,6 @@ StochmapResult *CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc,
     FreeQset(QLset,nproc);
     FreeDoubleMatrix(EigenValues);
 
-    for(i=0;i<nbranch;i++){
-            printf("PTR %p\n",priorE[i]);
-    }
-
     result = (StochmapResult*)malloc(sizeof(StochmapResult));
     if (!result)
     return NULL;
@@ -1286,7 +1282,6 @@ StochmapResult *CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc,
     result->condE = condE;
     result->priorE = priorE;
 
-    printf("PTR PTR %p %p %p %p\n",priorE,condE,result->priorE,result->condE);
     return result;
 }
 
