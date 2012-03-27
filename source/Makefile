@@ -1,4 +1,4 @@
-     CC = gcc
+CC = gcc
 
 CFLAGS = -pedantic -Wall -g -O2
 
@@ -21,7 +21,13 @@ libstochmap.o: stochmap.c stochmap.h
 	$(CC) $(CFLAGS) -fPIC -c $<
 
 lib: libstochmap.so.1.0.1
+
+maclib: libstochmap.dylib
 libstochmap.so.1.0.1: $(OBJSL)
 	gcc -shared -Wl,-soname,libstochmap.so.1 -o libstochmap.so.1.0.1 $(OBJSL) 
+
+libstochmap.dylib: $(OBJSL)
+	gcc -dynamiclib -current_version 1.0.1 $(OBJSL) -o libstochmap.dylib
+
 clean :
 	$(RM) $(OBJS)
