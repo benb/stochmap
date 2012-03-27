@@ -1301,6 +1301,7 @@ int main(int argc, char * argv[])
   settings      *sets;
   char          *infilename, *outfilename, *lfilename;
   FILE          *outfile;
+  StochmapResult *ans;
 
   sets=(settings *)calloc(1,sizeof(settings));
   infilename=(char *)calloc(LEN,sizeof(char));
@@ -1350,7 +1351,7 @@ int main(int argc, char * argv[])
   
     fprintf(outfile,"%s version %s\n%s\nCommand:\n",PROGRAM_NAME,PROGRAM_VERSION,COPYRIGHT);
     for(i=0;i<argc;i++) fprintf(outfile,"%s%s",argv[i],(i<argc-1) ? " " : "");/*write arguments to output file*/
-    CalculateAndWrite( nsite,  nstate,  nbranch,  nproc,  ncols,
+    ans = CalculateAndWrite( nsite,  nstate,  nbranch,  nproc,  ncols,
          scalefact, L,  multiplicities, sitemap,
          partials,
          Qset, 
@@ -1375,9 +1376,8 @@ int main(int argc, char * argv[])
     free(lfilename);
     free(sets);
 
-    FreecondE(condE,nbranch);
-    FreeDoubleMatrix(priorE);
-    FreeDoubleMatrix(priorV);
+    FreecondE(ans->condE,nbranch);
+    FreeDoubleMatrix(ans->priorE);
 
 
     fclose(outfile);
