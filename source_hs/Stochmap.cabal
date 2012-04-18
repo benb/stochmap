@@ -57,4 +57,5 @@ Library
   
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   Build-tools:         hsc2hs
+  Include-dirs:        ../source
   
