@@ -1,5 +1,5 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
-module Stochmap (calculateAndWrite) where
+module Stochmap (calculateAndWrite,calculateStochmap) where
 
 import Foreign
 import Foreign.C
@@ -10,6 +10,7 @@ import System.IO
 import System.Posix.Types
 import System.Posix
 import Data.List
+import System.IO.Unsafe
 
 #include "stochmap.h"
 
@@ -49,7 +50,8 @@ parseResult nbranch nproc ncols (StochmapResultC condEC priorEC)= do
 
 
 {-- exposed function --}
---calculateAndWrite :: Int -> Int -> Int -> Int -> Int -> [[Int]] -> [Int] -> [Int] -> [[[[[Double]]]]] -> [[[Double]]] -> [[Double]] -> [[Double]] -> [Double] -> [Double] -> Maybe Handle -> IO ([[[Double]]],[[Double]])
+--calculateAndWrite :: Int -> Int -> Int -> Int -> Int -> [[Int]] -> [Int] -> [Int] -> [[[[[Double]]]]] -> [[[Double]]] -> [[Double]] -> [[Double]] -> [Double] -> [Double] -> Maybe Handle -> ([[[Double]]],[[Double]])
+calculateStochmap nSite nState nBranch nProc nCols lMat multiplicites size parseResult qset sitelikes pi_i branchLengths mixProbs = System.IO.Unsafe.unsafePerformIO $ calculateAndWrite nSite nState nBranch nProc nCols lMat multiplicites size parseResult qset sitelikes pi_i branchLengths mixProbs Nothing
 calculateAndWrite nSite nState nBranch nProc nCols lMat
             multiplicites sitemap partials qset sitelikes pi_i 
             branchLengths mixProbs handle = do let c_nSite = fromIntegral nSite
