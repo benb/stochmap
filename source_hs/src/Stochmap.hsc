@@ -12,6 +12,7 @@ import System.Posix
 import Data.List
 import System.IO.Unsafe
 
+#include "stdio.h"
 #include "stochmap.h"
 
 foreign import ccall "" fdopen :: Fd -> CString -> IO (Ptr CFile)
