@@ -63,7 +63,9 @@ DEALINGS IN THE SOFTWARE.
 #include "mb.h"
 #include "mbmath_sub.h"
 #include "globals.h"
+#ifndef BUILDLIBRARY
 #include "getopt.h" /*uses my_getopt because GNU getopt isn't available on all systems*/
+#endif
 #include "stochmap.h"
 
 /* prototypes */
@@ -102,7 +104,6 @@ void printHelp(void);
 void ReadLMatrix(char *lfilename, int **L, int n);
 void ReadMap(int *sitemap,int ncols, char *line);
 void ReadOneSite(FILE *partial_fv, int branch, int nstate, int site, MrBFlt *****partials, int ****scalefact);
-void ReadParams(int argc, char **argv, settings *sets, char *infilename, char *outfilename, char *lfilename);
 void ReadPartialLine(char *line, MrBFlt *****partials, int branch, int proc, int which, int site, int nstate, int ****scalefact);
 void ReadPartials(char *partialfilename, MrBFlt ***Qset, MrBFlt *****partials, MrBFlt **sitelikes, MrBFlt *tbranch, MrBFlt *mixprobs, int nstate, int nproc, int nsite, int *multiplicities, int ****scalefact, int *sitemap, int ncols, MrBFlt **pi_i);
 void ReadPi(FILE *fv, int nstate, MrBFlt **pi_i, int proc);
@@ -112,7 +113,9 @@ void ReadSites(FILE *partial_fv, MrBFlt **sitelikes, int branch, int nstate, int
 void testEHD(MrBFlt **Fp,MrBFlt **Fc, MrBFlt *L);
 void WeightByPi(MrBFlt **F,MrBFlt *pi_i, int nsite, int nstate);
 void WriteResults(FILE *outfile,MrBFlt *****partials,int nbranch, int nproc, int nsite, MrBFlt ***condE, MrBFlt **priorE, MrBFlt **priorV, int *multiplicities, int *sitemap, int ncols, MrBFlt *tbranch);
-
+#ifndef BUILDLIBRARY
+void ReadParams(int argc, char **argv, settings *sets, char *infilename, char *outfilename, char *lfilename);
+#endif
 /*allocate space for conditional expectations*/
 MrBFlt ***AllocatecondE(int nbranch,int nproc,int nsite)
 {
@@ -881,52 +884,6 @@ void ReadOneSite(FILE *partial_fv, int branch, int nstate, int site, MrBFlt ****
   }
 }
 
-void ReadParams(int argc, char **argv, settings *sets, char *infilename, char *outfilename, char *lfilename)
-{
-  int c,offset=0;
-  extern char *optarg;
-  sets->printHelp=FALSE;
-
-  opterr = 0;
-  while ((c = getopt (argc, argv, "h")) != -1) switch (c){
-  case 'h':/*help message*/
-    sets->printHelp=TRUE;
-    return;
-    break;
-  case '?':
-    if (isprint (optopt))
-      fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-    else
-      fprintf (stderr,"Unknown option character `\\x%x'.\n",optopt);
-    exit(EXIT_FAILURE);
-  default:
-    abort ();
-}
-  if(offset==0){
-    if(argc > optind){
-      sprintf(infilename,"%s",argv[optind]);
-    }
-    else{/* ask for the input-file */
-      printf("\nEnter input file : ");
-      scanf("%s",infilename);
-    }
-  }
-  if(argc>(optind+1+offset)){
-    sprintf(outfilename,"%s",argv[optind+1+offset]);
-  }
-  else{/* ask for output-file.        */
-    printf("\nEnter output file : ");
-    scanf("%s",outfilename);
-  }
-  if(argc>(optind+2+offset)){
-    sprintf(lfilename,"%s",argv[optind+2+offset]);
-  }
-  else{/* ask for L matrix file.        */
-    printf("\nEnter L matrix file : ");
-    scanf("%s",lfilename);
-  }
-}
-
 /*read a line of partial likelihoods*/
 void ReadPartialLine(char *line, MrBFlt *****partials, int branch, int proc, int which, int site, int nstate, int ****scalefact)
 {
@@ -1388,5 +1345,50 @@ int main(int argc, char * argv[])
 
 
   return (0);
+}
+void ReadParams(int argc, char **argv, settings *sets, char *infilename, char *outfilename, char *lfilename)
+{
+  int c,offset=0;
+  extern char *optarg;
+  sets->printHelp=FALSE;
+
+  opterr = 0;
+  while ((c = getopt (argc, argv, "h")) != -1) switch (c){
+  case 'h':/*help message*/
+    sets->printHelp=TRUE;
+    return;
+    break;
+  case '?':
+    if (isprint (optopt))
+      fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+    else
+      fprintf (stderr,"Unknown option character `\\x%x'.\n",optopt);
+    exit(EXIT_FAILURE);
+  default:
+    abort ();
+}
+  if(offset==0){
+    if(argc > optind){
+      sprintf(infilename,"%s",argv[optind]);
+    }
+    else{/* ask for the input-file */
+      printf("\nEnter input file : ");
+      scanf("%s",infilename);
+    }
+  }
+  if(argc>(optind+1+offset)){
+    sprintf(outfilename,"%s",argv[optind+1+offset]);
+  }
+  else{/* ask for output-file.        */
+    printf("\nEnter output file : ");
+    scanf("%s",outfilename);
+  }
+  if(argc>(optind+2+offset)){
+    sprintf(lfilename,"%s",argv[optind+2+offset]);
+  }
+  else{/* ask for L matrix file.        */
+    printf("\nEnter L matrix file : ");
+    scanf("%s",lfilename);
+  }
 }
 #endif

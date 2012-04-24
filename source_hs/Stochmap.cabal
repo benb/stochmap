@@ -7,7 +7,7 @@ Name:                stochmap
 -- The package version. See the Haskell package versioning policy
 -- (http://www.haskell.org/haskellwiki/Package_versioning_policy) for
 -- standards guiding when and how versions should be incremented.
-Version:             0.4
+Version:             0.5
 
 -- A short (one-line) description of the package.
 Synopsis:            Binding to Matthew Spencer's Stochmap utility
@@ -57,5 +57,6 @@ Library
   
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   Build-tools:         hsc2hs
-  Include-dirs:        ../source
-  
+  Include-dirs:        csource
+  C-Sources:           csource/stochmap.c csource/mbmath_sub.c 
+  cc-options:          -DBUILDLIBRARY

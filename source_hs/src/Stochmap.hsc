@@ -74,7 +74,7 @@ calculateAndWrite nSite nState nBranch nProc nCols lMat
                                                c_mixProbs <- newArrayX realToFrac mixProbs
                                                ans <- c_CalculateAndWrite c_nSite c_nState c_nBranch c_nProc c_nCols c_scales c_lMat c_multiplicites c_sitemap c_partials c_qset c_sitelikes c_pi_i c_branchLengths c_mixProbs c_handle
                                                ans' <- peek ans
-                                               parseResult nBranch nProc nCols ans'
+                                               parseResult nBranch nProc nSite ans'
 
 
 newArrayX f xs = newArray $ map f xs
