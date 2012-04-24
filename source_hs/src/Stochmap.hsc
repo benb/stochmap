@@ -37,10 +37,7 @@ instance Storable StochmapResultC where
 
 parseResult :: Int -> Int -> Int -> StochmapResultC -> IO ([[[Double]]],[[Double]])
 parseResult nbranch nproc ncols (StochmapResultC condEC priorEC)= do 
-                                                                  print priorEC
-                                                                  print condEC
                                                                   priorE'' <- peekArray nbranch priorEC
-                                                                  print priorE''
                                                                   priorE' <- mapM (peekArray nproc) priorE''
                                                                   let priorEConv = map (map realToFrac) priorE'
                                                                   condE''' <- peekArray nbranch condEC

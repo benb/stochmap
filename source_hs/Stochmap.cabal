@@ -58,5 +58,6 @@ Library
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   Build-tools:         hsc2hs
   Include-dirs:        csource
+  ghc-options:         -O2
   C-Sources:           csource/stochmap.c csource/mbmath_sub.c 
-  cc-options:          -DBUILDLIBRARY
+  cc-options:          -DBUILDLIBRARY -O3 
