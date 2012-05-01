@@ -1171,6 +1171,33 @@ void WriteResults(FILE *outfile,MrBFlt *****partials, int nbranch, int nproc, in
   free(zs);
 }
 
+StochmapResult *CalculateAndWriteAndFree(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap,
+        MrBFlt *****partials,
+        MrBFlt ***Qset, 
+        MrBFlt **sitelikes, MrBFlt **pi_i,
+        MrBFlt *tbranch, MrBFlt *mixprobs,
+        FILE *outfile
+                ){
+    StochmapResult* ans;
+    ans = CalculateAndWrite( nsite,  nstate,  nbranch,  nproc,  ncols,
+         scalefact, L,  multiplicities, sitemap,
+         partials,
+         Qset, 
+         sitelikes, pi_i,  
+         tbranch,  mixprobs, outfile);
+    /* free memory */
+    FreeQset(Qset,nproc);
+    FreeDoubleMatrix(pi_i);
+    FreePartials(partials,nbranch,nproc);
+    FreeDoubleMatrix(sitelikes);
+    free(tbranch);
+    Freescalefact(scalefact,nbranch,nproc,nsite);
+    free(mixprobs);
+    free(multiplicities);
+    free(sitemap);
+    FreeSquareIntegerMatrix(L);
+    return ans;
+}
 StochmapResult *CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc, int ncols, int ****scalefact, int **L, int *multiplicities, int *sitemap,
         MrBFlt *****partials,
         MrBFlt ***Qset, 
@@ -1231,10 +1258,14 @@ StochmapResult *CalculateAndWrite(int nsite, int nstate, int nbranch, int nproc,
     FreeQset(inverseEigVecs,nproc);
     FreeQset(QLset,nproc);
     FreeDoubleMatrix(EigenValues);
+    FreeDoubleMatrix(priorV);
 
     result = (StochmapResult*)malloc(sizeof(StochmapResult));
-    if (!result)
-    return NULL;
+    if (!result){
+            FreeDoubleMatrix(priorE);
+            FreecondE(condE,nbranch);
+            return NULL;
+    }
 
     result->condE = condE;
     result->priorE = priorE;
@@ -1308,7 +1339,7 @@ int main(int argc, char * argv[])
   
     fprintf(outfile,"%s version %s\n%s\nCommand:\n",PROGRAM_NAME,PROGRAM_VERSION,COPYRIGHT);
     for(i=0;i<argc;i++) fprintf(outfile,"%s%s",argv[i],(i<argc-1) ? " " : "");/*write arguments to output file*/
-    ans = CalculateAndWrite( nsite,  nstate,  nbranch,  nproc,  ncols,
+    ans = CalculateAndWriteAndFree( nsite,  nstate,  nbranch,  nproc,  ncols,
          scalefact, L,  multiplicities, sitemap,
          partials,
          Qset, 
@@ -1318,16 +1349,6 @@ int main(int argc, char * argv[])
 
 
     /* free memory */
-    FreeQset(Qset,nproc);
-    FreeDoubleMatrix(pi_i);
-    FreePartials(partials,nbranch,nproc);
-    FreeDoubleMatrix(sitelikes);
-    free(tbranch);
-    Freescalefact(scalefact,nbranch,nproc,nsite);
-    free(mixprobs);
-    free(multiplicities);
-    free(sitemap);
-   FreeSquareIntegerMatrix(L);
     free(infilename);
     free(outfilename);
     free(lfilename);

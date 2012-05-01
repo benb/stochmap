@@ -24,6 +24,11 @@ handleToCFile h m = do iomode <- newCString m
 foreign import ccall "stochmap.h CalculateAndWrite"
      c_CalculateAndWrite :: CInt -> CInt -> CInt -> CInt -> CInt -> Ptr (Ptr (Ptr (Ptr CInt))) -> Ptr (Ptr CInt) -> Ptr CInt -> Ptr CInt -> Ptr (Ptr (Ptr (Ptr (Ptr CDouble)))) -> Ptr (Ptr (Ptr CDouble)) -> Ptr (Ptr CDouble) -> Ptr (Ptr CDouble) -> Ptr CDouble -> Ptr CDouble -> Ptr CFile -> IO (Ptr StochmapResultC)
 
+foreign import ccall "stochmap.h FreecondE"
+     freeCondE :: Ptr (Ptr (Ptr CDouble)) -> CInt -> IO () 
+foreign import ccall "stochmap.h FreeDoubleMatrix"
+     freeDoubleMatrix :: Ptr (Ptr CDouble) -> IO () 
+
 
 data StochmapResultC = StochmapResultC {condE :: (Ptr (Ptr (Ptr CDouble))), priorE :: (Ptr (Ptr CDouble))}
 instance Storable StochmapResultC where
@@ -44,9 +49,9 @@ parseResult nbranch nproc ncols (StochmapResultC condEC priorEC)= do
                                                                   condE'' <- mapM (peekArray nproc) condE'''
                                                                   condE' <- (mapM . mapM) (peekArray ncols) condE''
                                                                   let condEConv = (map . map . map) realToFrac condE'
+                                                                  freeCondE condEC (fromIntegral nbranch)
+                                                                  freeDoubleMatrix priorEC
                                                                   return (condEConv,priorEConv)
-
-
 {-- exposed function --}
 --calculateAndWrite :: Int -> Int -> Int -> Int -> Int -> [[Int]] -> [Int] -> [Int] -> [[[[[Double]]]]] -> [[[Double]]] -> [[Double]] -> [[Double]] -> [Double] -> [Double] -> Maybe Handle -> ([[[Double]]],[[Double]])
 calculateStochmap nSite nState nBranch nProc nCols lMat multiplicites siteMap partials qset sitelikes pi_i branchLengths mixProbs = System.IO.Unsafe.unsafePerformIO $ calculateAndWrite nSite nState nBranch nProc nCols lMat multiplicites siteMap partials qset sitelikes pi_i branchLengths mixProbs Nothing
@@ -71,8 +76,30 @@ calculateAndWrite nSite nState nBranch nProc nCols lMat
                                                c_mixProbs <- newArrayX realToFrac mixProbs
                                                ans <- c_CalculateAndWrite c_nSite c_nState c_nBranch c_nProc c_nCols c_scales c_lMat c_multiplicites c_sitemap c_partials c_qset c_sitelikes c_pi_i c_branchLengths c_mixProbs c_handle
                                                ans' <- peek ans
+                                               freeScalesPtr partials c_scales c_partials
+                                               freeArray2 lMat c_lMat
+                                               free c_multiplicites
+                                               free c_sitemap
+                                               freeArray3 qset c_qset
+                                               freeArray2 sitelikes c_sitelikes
+                                               freeArray2 pi_i c_pi_i
+                                               free c_branchLengths
+                                               free c_mixProbs
+                                               free ans
                                                parseResult nBranch nProc nSite ans'
 
+freeArray5 :: [[[[[a]]]]] -> (Ptr (Ptr (Ptr (Ptr (Ptr b))))) -> IO ()
+freeArray5 list array = do mapM_ (\(x,y)-> freeArray4 x =<< peekElemOff array y) $ zip list [0..]
+
+freeArray4 :: [[[[a]]]] -> (Ptr (Ptr (Ptr (Ptr b)))) -> IO ()
+freeArray4 list array = do mapM_ (\(x,y)-> freeArray3 x =<< peekElemOff array y) $ zip list [0..]
+
+freeArray3 :: [[[a]]] -> (Ptr (Ptr (Ptr b))) -> IO ()
+freeArray3 list array = do mapM_ (\(x,y)-> freeArray2 x =<< peekElemOff array y) $ zip list [0..]
+
+freeArray2 :: [[a]] -> (Ptr (Ptr b)) -> IO ()
+freeArray2 list array = do mapM_ (\x->free =<< peekElemOff array x) [0..((length list)-1)]
+                           free array
 
 newArrayX f xs = newArray $ map f xs
 
@@ -103,6 +130,11 @@ makeScalesPtr xs = do let (scales,mats) = makeScales xs
                       matsPtr <- makePartialBranchEnds mats
                       scalePtr <- newArray4 fromIntegral scales
                       return (scalePtr,matsPtr)
+
+freeScalesPtr :: [[[[[Double]]]]] -> (Ptr (Ptr (Ptr (Ptr CInt)))) -> (Ptr (Ptr (Ptr (Ptr (Ptr CDouble))))) -> IO ()
+freeScalesPtr xs scalePtr matsPtr = do let (scales,mats) = makeScales xs
+                                       freeArray4 scales scalePtr
+                                       freeArray5 mats matsPtr
 
 print1 :: [[[[Int]]]] -> [[[[[Double]]]]] -> IO [[[[()]]]]
 print2 :: ([[[Int]]],[[[[Double]]]]) -> IO [[[()]]]
